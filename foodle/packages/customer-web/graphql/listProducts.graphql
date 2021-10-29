@@ -1,0 +1,70 @@
+query products {
+  site {
+    products(first: 50, after: "YXJyYXljb25uZWN0aW9uOjUw") {
+      pageInfo {
+        startCursor
+        endCursor
+        hasNextPage
+        hasPreviousPage
+      }
+      edges {
+        node {
+          id
+          entityId
+          name
+          sku
+          brand {
+            id
+            entityId
+            name
+            pageTitle
+          }
+          description
+          categories {
+            edges {
+              node {
+                id
+                entityId
+                name
+              }
+            }
+          }
+          prices(includeTax: true) {
+            basePrice {
+              value
+            }
+            price {
+              value
+            }
+            salePrice {
+              value
+            }
+          }
+          availabilityV2 {
+            status
+          }
+          variants {
+            edges {
+              node {
+                id
+                entityId
+                sku
+                prices(includeTax: true) {
+                  basePrice {
+                    value
+                  }
+                  price {
+                    value
+                  }
+                  salePrice {
+                    value
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,14 @@
+query listCategories {
+  site {
+    categoryTree {
+      name
+      entityId
+      path
+      children {
+        name
+        path
+      }
+      description
+    }
+  }
+}

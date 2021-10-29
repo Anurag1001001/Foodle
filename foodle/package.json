@@ -1,0 +1,15 @@
+{
+  "name": "@foodleab/foodle",
+  "private": true,
+  "scripts": {
+    "prod": "docker build --tag prod-foodle-customer -f packages/customer-web/Dockerfile . && docker tag prod-foodle-customer gcr.io/foodler-system/prod-foodle-customer && docker push gcr.io/foodler-system/prod-foodle-customer",
+    "staging": "docker build --tag staging-foodle-customer -f packages/customer-web/Dockerfile . && docker tag staging-foodle-customer gcr.io/foodler-system/staging-foodle-customer && docker push gcr.io/foodler-system/staging-foodle-customer",
+    "deploy-dev": "docker build --tag test-foodle-customer -f packages/customer-web/Dockerfile . && docker tag test-foodle-customer gcr.io/foodler-system/test-foodle-customer && docker push gcr.io/foodler-system/test-foodle-customer"
+  },
+  "workspaces": [
+    "packages/*"
+  ],
+  "devDependencies": {
+    "typescript": "^4.2.3"
+  }
+}

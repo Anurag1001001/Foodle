@@ -1,0 +1,14 @@
+query brands {
+  site {
+    brands {
+      edges {
+        node {
+          id
+          entityId
+          name
+          pageTitle
+        }
+      }
+    }
+  }
+}

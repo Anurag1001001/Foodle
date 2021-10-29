@@ -1,0 +1,111 @@
+query brandsWithProducts {
+  site {
+    brands {
+      edges {
+        node {
+          id
+          entityId
+          name
+          pageTitle
+          products {
+            edges {
+              node {
+                ...ProductFragment
+                variants {
+                  edges {
+                    ...VariantFragment
+                  }
+                }
+                relatedProducts {
+                  edges {
+                    node {
+                      ...ProductFragment
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+fragment ProductFragment on Product {
+  id
+  entityId
+  name
+  sku
+  brand {
+    id
+    entityId
+    name
+    pageTitle
+  }
+  description
+  customFields {
+    edges {
+      node {
+        name
+        value
+      }
+    }
+  }
+  categories {
+    edges {
+      node {
+        id
+        entityId
+        name
+      }
+    }
+  }
+  prices(includeTax: true) {
+    basePrice {
+      value
+    }
+    price {
+      value
+    }
+    salePrice {
+      value
+    }
+  }
+  availabilityV2 {
+    status
+  }
+}
+
+fragment VariantFragment on VariantEdge {
+  node {
+    id
+    entityId
+    sku
+    options {
+      edges {
+        node {
+          values {
+            edges {
+              node {
+                entityId
+                label
+              }
+            }
+          }
+        }
+      }
+    }
+    prices(includeTax: true) {
+      basePrice {
+        value
+      }
+      price {
+        value
+      }
+      salePrice {
+        value
+      }
+    }
+  }
+}

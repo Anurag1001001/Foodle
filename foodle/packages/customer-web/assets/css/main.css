@@ -1,0 +1,165 @@
+@font-face {
+  font-family: 'Brown';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('~assets/fonts/Brown-Bold.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Brown';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('~assets/fonts/Brown-Regular.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Colby';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('~assets/fonts/Colby.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Felt_That';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('~assets/fonts/Felt_That.ttf') format('truetype');
+}
+
+html {
+  font-family:
+    'Brown',
+    Fallback,
+    sans-serif;
+  font-size: 16px;
+  word-spacing: 1px;
+  -ms-text-size-adjust: 100%;
+  -webkit-text-size-adjust: 100%;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased;
+  box-sizing: border-box;
+}
+
+.font-colby {
+  font-family:
+    'Colby',
+    Fallback,
+    sans-serif;
+}
+
+.font-felt {
+  font-family:
+    'Felt_That',
+    Fallback,
+    sans-serif;
+}
+
+.text-9xl {
+  font-size: 9rem;
+}
+
+.text-2rem {
+  font-size: 2rem;
+}
+
+.text-3-5xl {
+  font-size: 3.5rem;
+}
+
+@media (min-width: 1024px) {
+}.text-4-5xl {
+  font-size: 4.5rem;
+}
+
+@media (min-width: 1024px) {
+}.text-5rem {
+   font-size: 5rem;
+ }
+
+.cart-image {
+  position: fixed!important;
+  top: 75vh!important;
+  right: 8vw!important;
+}
+
+@media (min-width: 1024px) {
+  .lg\:text-7xl {
+    font-size: 7.5rem;
+  }
+
+  .lg\:text-5rem {
+    font-size: 5rem;
+  }
+
+  .lg\:text-2rem {
+    font-size: 2rem;
+  }
+
+  .text-9xl {
+    font-size: 9rem;
+  }
+
+}
+
+.button {
+  @apply px-8 py-4 rounded-full outline-none transition duration-200 ease-in-out
+}
+
+.button-sm {
+  @apply px-6 py-3 rounded-full outline-none transition duration-200 ease-in-out text-xs
+}
+
+.button:focus {
+  @apply outline-none
+}
+
+.button-lg {
+  @apply px-16 py-4 rounded-full outline-none transition duration-200 ease-in-out
+}
+
+.button-lg:focus {
+  @apply outline-none
+}
+
+.button-xl {
+  @apply px-24 py-3 rounded-full outline-none transition duration-200 ease-in-out
+}
+
+.button-xl:focus {
+  @apply outline-none
+}
+
+.button-spacing {
+  letter-spacing: 0.89px;
+}
+
+@media (min-width: 1024px) {
+  .button-xl {
+    @apply px-20 py-5 leading-7 rounded-full outline-none transition duration-200 ease-in-out
+  }
+}
+
+.foodler-box-shadow {
+  box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.1);
+}
+
+.foodler-box-shadow-lg {
+  box-shadow: 0 -2px 40px 0 rgba(0, 0, 0, 0.1);
+}
+
+.leading-16 {
+  line-height: 4rem;
+}
+
+/*** Google Autocomplete styling */
+.pac-container {
+  z-index: 9999;
+}
+
+.pac-item {
+  padding: 4px 10px 10px;
+}

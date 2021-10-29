@@ -1,0 +1,158 @@
+name: CI/CD
+env:
+  GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT }}
+  GCP_SERVICE: foodler-customer-web
+  GCP_REGION: europe-north1
+  NODE_VERSION: 14.x
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+      - name: Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Cache Yarn folder
+        uses: actions/cache@v2
+        id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+        with:
+          path: .yarn/cache
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+      - name: Cache Node modules
+        uses: actions/cache@v2
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-modules-${{ hashFiles('**/package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-modules-
+      - name: Install Dependencies
+        if: steps.yarn-cache.outputs.cache-hit != 'true'
+        run: yarn install
+      - name: Make envfile
+        uses: SpicyPizza/create-envfile@v1
+        with:
+          envkey_STORYBLOK_ACCESS_TOKEN: ${{ secrets.STORYBLOK_PUBLIC_ACCESS_TOKEN }}
+          envkey_COMMERCE_TOKEN: ${{ secrets.COMMERCE_TOKEN }}
+          envkey_BASE_DOMAIN: '/'
+          file_name: .env
+      - name: Build Project
+        run: yarn build
+        env:
+          CI: true
+      - name: Cache nuxt build output
+        uses: actions/cache@v2
+        with:
+          path: .nuxt
+          key: ${{ runner.os }}-nuxt-${{ hashFiles('.nuxt/**/*') }}
+
+  publish:
+    name: Publish 
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@master
+      - name: Restore Yarn cache
+        uses: actions/cache@v2
+        with:
+          path: .yarn/cache
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+      - name: Restore Node modules cache
+        uses: actions/cache@v2
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-modules-${{ hashFiles('**/package.json') }}
+      - name: Restore nuxt build output cache
+        uses: actions/cache@v2
+        with:
+          path: .nuxt
+          key: ${{ runner.os }}-nuxt-${{ hashFiles('.nuxt/**/*') }}
+      - name: Setup Gcloud
+        uses: google-github-actions/setup-gcloud@v0.2.0
+        with:
+          project_id: ${{ env.GCP_PROJECT_ID }}
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+      - name: Login to GCR
+        run: gcloud auth configure-docker
+      - name: Build and push
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: true
+          tags: gcr.io/${{ env.GCP_PROJECT_ID }}/${{ env.GCP_SERVICE }}:${{ github.sha }}
+
+  deploy:
+    name: Deploy
+    needs: publish
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@master
+      - name: Set service name
+        id: deploy_vars
+        uses: actions/github-script@v3
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const serviceName = context.eventName === 'pull_request' ? `${process.env.GCP_SERVICE}-preview-pr-${context.payload.pull_request.number}` : `${process.env.GCP_SERVICE}`;
+            core.setOutput('service_name', serviceName);
+      - name: Setup Gcloud
+        uses: google-github-actions/setup-gcloud@v0.2.0
+        with:
+          project_id: ${{ env.GCP_PROJECT_ID }}
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          export_default_credentials: true
+      # preview
+      - name: Deploy preview to Cloud Run
+        id: deploy_preview
+        uses: google-github-actions/deploy-cloudrun@main
+        if: github.event_name == 'pull_request'
+        with:
+          image: gcr.io/${{ env.GCP_PROJECT_ID }}/${{ env.GCP_SERVICE }}:${{ github.sha }}
+          service: ${{ steps.deploy_vars.outputs.service_name }}
+          region: ${{ env.GCP_REGION }}
+          env_vars: STORYBLOK_ACCESS_TOKEN=${{ secrets.STORYBLOK_PREVIEW_ACCESS_TOKEN }},COMMERCE_TOKEN=${{ secrets.COMMERCE_TOKEN }},BASE_DOMAIN=/
+      # prod
+      - name: Deploy prod to Cloud Run
+        id: deploy_prod
+        uses: google-github-actions/deploy-cloudrun@main
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        with:
+          image: gcr.io/${{ env.GCP_PROJECT_ID }}/${{ env.GCP_SERVICE }}:${{ github.sha }}
+          service: ${{ steps.deploy_vars.outputs.service_name }}
+          region: ${{ env.GCP_REGION }}
+          env_vars: STORYBLOK_ACCESS_TOKEN=${{ secrets.STORYBLOK_PUBLIC_ACCESS_TOKEN }},COMMERCE_TOKEN=${{ secrets.COMMERCE_TOKEN }},BASE_DOMAIN=/
+      - name: Allow public access
+        run: |
+          gcloud run services add-iam-policy-binding ${{ steps.deploy_vars.outputs.service_name }} \
+            --member="allUsers" \
+            --role="roles/run.invoker" \
+            --project="${{ env.GCP_PROJECT_ID }}" \
+            --region="${{ env.GCP_REGION }}" \
+            --platform="managed"
+      - name: Comment preview deployment URL on pull request
+        uses: actions/github-script@v3
+        if: github.event_name == 'pull_request'
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: "Service deployed to ${{ steps.deploy_preview.outputs.url }} 🚀"
+            })

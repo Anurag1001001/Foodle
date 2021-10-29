@@ -1,0 +1,5 @@
+{{> header }}
+{{> orderHeader orderId=order.number }}
+{{> orderContact recipient=order.recipient contact= order.deliveryAddress orderDate= order.createdAt deliveryDate=order.deliveryDate estimatedDeliveryFrom= order.estimatedDeliveryFrom estimatedDeliveryTo=order.estimatedDeliveryTo}}
+{{> orderDetails }}
+{{> footer}}

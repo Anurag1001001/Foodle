@@ -1,0 +1,16 @@
+{
+  "name": "Remote Schema",
+  "schemaPath": "remote-schema.graphql",
+  "extensions": {
+    "endpoints": {
+      "BigCommerce GraphQL Endpoint": {
+        "url": "https://store-rrhwqda318.mybigcommerce.com/graphql",
+        "headers": {
+          "user-agent": "JS GraphQL",
+          "Authorization": "Bearer ${env:COMMERCE_GRAPHQL_TOKEN}"
+        },
+        "introspect": true
+      }
+    }
+  }
+}

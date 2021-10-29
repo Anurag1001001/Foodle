@@ -1,0 +1,9 @@
+.idea
+.git
+*.md
+!.nuxt
+dist
+.github
+node_modules/
+!.yarn/cache
+.env
